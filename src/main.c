@@ -1,7 +1,20 @@
-#include "../include/graphics.h"
-#include <stdio.h>
+#include "../include/board.h"
+#include <ncurses.h>
+#include <panel.h>
 
-int main() {
-  printf("Starting connect four...\n");
-  draw();
+int main(int argc, char **argv) {
+
+  initscr();
+  printw("Press any key");
+  refresh();
+
+  char letter = getch();
+  clear();
+  printw("You pushed: '%c'", letter);
+  refresh();
+
+  getch();
+  endwin();
+
+  return 0;
 }

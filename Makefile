@@ -1,5 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Iinclude
+LDFLAGS = -lncurses
 
 SRC_DIR = src
 BUILD_DIR = build
@@ -12,7 +13,7 @@ TARGET = $(BUILD_DIR)/connect-four
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CC) $(OBJS) -o $@
+	$(CC) $(OBJS) -o $@ $(LDFLAGS)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	mkdir -p $(BUILD_DIR)
