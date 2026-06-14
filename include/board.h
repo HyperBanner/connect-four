@@ -13,3 +13,4 @@ typedef struct Cell {
 cell_t (*init_board(void))[7];
 void draw_board(WINDOW *win, cell_t board[6][7]);
 void draw_cell(WINDOW *win, int row, int col, char piece);
+void drop_chip(cell_t board[6][7], int selected_col, state_t color);

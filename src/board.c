@@ -8,10 +8,6 @@
 #define CELL_W 6
 
 void draw_board(WINDOW *win, cell_t board[6][7]) {
-  // initialize color pairs
-  init_pair(1, COLOR_RED, COLOR_BLACK);
-  init_pair(2, COLOR_YELLOW, COLOR_BLACK);
-
   // draw
   box(win, 0, 0);
 
@@ -24,15 +20,16 @@ void draw_board(WINDOW *win, cell_t board[6][7]) {
       char symbol = '0';
 
       if (board[r][c].state == RED) {
+        wattron(win, COLOR_PAIR(1));
         symbol = 'R';
-        attrset(COLOR_PAIR(1));
       } else if (board[r][c].state == YELLOW) {
-        attrset(COLOR_PAIR(2));
+        wattron(win, COLOR_PAIR(2));
         symbol = 'Y';
       }
 
       mvwaddch(win, y, x, symbol);
-      standend();
+      wattroff(win, COLOR_PAIR(1));
+      wattroff(win, COLOR_PAIR(2));
     }
   }
 }
@@ -53,18 +50,11 @@ cell_t (*init_board(void)) [COLS] {
   return board;
 }
 
-void check_occupied(cell_t board[6][7], int selected_col) {
-  int num_free = 6;
-  for (int i = 0; i < 6; ++i) {
-    if (board[i][selected_col].state != EMPTY) {
-      num_free--;
+void drop_chip(cell_t board[6][7], int selected_col, state_t state) {
+  for (int i = 5; i >= 0; --i) {
+    if (board[i][selected_col].state == EMPTY) {
+      board[i][selected_col].state = state;
+      break;
     }
-  }
-}
-
-void drop_chip(WINDOW *win, cell_t board[6][7], int selected_col) {
-  switch (selected_col) {
-  case 1:
-    // do stuff
   }
 }
