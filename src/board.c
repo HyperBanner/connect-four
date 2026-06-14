@@ -2,59 +2,66 @@
 #include <ncurses.h>
 #include <stdlib.h>
 
-#define ROWS 6
-#define COLS 7
-#define CELL_H 3
-#define CELL_W 6
-
-void draw_board(WINDOW *win, cell_t board[6][7]) {
-  // draw
-  box(win, 0, 0);
-
-  for (int r = 0; r < 6; ++r) {
-    for (int c = 0; c < 7; ++c) {
-
-      int y = 1 + r * CELL_H;
-      int x = 2 + c * CELL_W;
-
-      char symbol = '0';
-
-      if (board[r][c].state == RED) {
-        wattron(win, COLOR_PAIR(1));
-        symbol = 'R';
-      } else if (board[r][c].state == YELLOW) {
-        wattron(win, COLOR_PAIR(2));
-        symbol = 'Y';
-      }
-
-      mvwaddch(win, y, x, symbol);
-      wattroff(win, COLOR_PAIR(1));
-      wattroff(win, COLOR_PAIR(2));
-    }
-  }
-}
-
-cell_t (*init_board(void)) [COLS] {
-  cell_t(*board)[COLS] = malloc(ROWS * sizeof(*board));
-  if (board == NULL)
+cell_t (*init_board(void))[7] {
+  cell_t(*board)[7] = malloc(6 * sizeof(*board));
+  if (board == NULL) {
     return NULL;
+  }
 
-  for (int r = 0; r < ROWS; ++r) {
-    for (int c = 0; c < COLS; ++c) {
-      board[r][c].row_num = r + 1;
-      board[r][c].col_num = c + 1;
-      board[r][c].state = EMPTY;
+  for (int row = 0; row < 6; ++row) {
+    for (int col = 0; col < 7; ++col) {
+      board[row][col].state = EMPTY;
     }
   }
 
   return board;
 }
 
-void drop_chip(cell_t board[6][7], int selected_col, state_t state) {
-  for (int i = 5; i >= 0; --i) {
-    if (board[i][selected_col].state == EMPTY) {
-      board[i][selected_col].state = state;
-      break;
+int drop_chip(cell_t board[6][7], int selected_col, state_t player) {
+  for (int row = 5; row >= 0; --row) {
+    if (board[row][selected_col].state == EMPTY) {
+      board[row][selected_col].state = player;
+      return row;
     }
   }
+  return -1; // column full
+}
+
+// helper for check_winner
+int count_direction(cell_t board[6][7], int row, int col, int dr, int dc,
+                    state_t player) {
+  int count = 0;
+
+  row += dr;
+  col += dc;
+
+  while (row >= 0 && row < 6 && col >= 0 && col < 7 &&
+         board[row][col].state == player) {
+    count++;
+
+    row += dr;
+    col += dc;
+  }
+
+  return count;
+}
+
+bool check_winner(cell_t board[6][7], int row, int col, state_t player) {
+  const int directions[4][2] = {{0, 1}, {1, 0}, {1, 1}, {-1, 1}};
+
+  for (int d = 0; d < 4; ++d) {
+    int dr = directions[d][0];
+    int dc = directions[d][1];
+
+    int total = 1; // newly placed chip
+
+    // check all directions
+    total += count_direction(board, row, col, dr, dc, player);
+    total += count_direction(board, row, col, -dr, -dc, player);
+
+    if (total >= 4) {
+      return true;
+    }
+  }
+  return false;
 }

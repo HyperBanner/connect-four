@@ -38,9 +38,9 @@ int main(void) {
   init_pair(1, COLOR_RED, -1);
   init_pair(2, COLOR_YELLOW, -1);
 
-  raw();
-  keypad(stdscr, TRUE);
-  noecho();
+  raw();                // no CTRL+C allowed, only q
+  keypad(stdscr, TRUE); // i need the arrow keys
+  noecho();             // disable annoying text buffering
   curs_set(0);
   refresh();
 
@@ -67,6 +67,8 @@ int main(void) {
       choose_player(); // will call the entire pre-game selection menu
   cell_t(*board)[7] = init_board();
   int selected_col = 0;
+  bool game_over = false;
+  state_t winner = EMPTY;
 
   // Main program loop
   while (1) {
@@ -75,27 +77,44 @@ int main(void) {
 
     int ch = getch();
 
-    if (ch == 'q')
+    if (ch == 'q') {
       break;
+    }
 
-    // handle other input
-    switch (ch) {
-    case KEY_LEFT:
-      if (selected_col > 0)
-        selected_col--;
-      break;
+    // check if game ended
+    if (!game_over) {
 
-    case KEY_RIGHT:
-      if (selected_col < 6)
-        selected_col++;
-      break;
+      // handle other input
+      switch (ch) {
 
-    case ' ':
-      drop_chip(board, selected_col, current_player);
+      case KEY_LEFT:
+        if (selected_col > 0) {
+          selected_col--;
+        }
+        break;
 
-      // simply interpolate player based on the previous color
-      current_player = (current_player == RED) ? YELLOW : RED;
-      break;
+      case KEY_RIGHT:
+        if (selected_col < 6) {
+          selected_col++;
+        }
+        break;
+
+      // space_key
+      case ' ':
+        int row = drop_chip(board, selected_col, current_player);
+
+        if (row != -1) {
+
+          if (check_winner(board, row, selected_col, current_player)) {
+            winner = current_player;
+            game_over = true;
+          } else {
+            // interpolate player based on previous color
+            current_player = (current_player == RED) ? YELLOW : RED;
+          }
+        }
+        break;
+      }
     }
   }
 
