@@ -6,21 +6,30 @@
 #define CELL_W 6
 
 void draw_selection(WINDOW *win, int selected_col) {
-  int x = 2 + selected_col * 6;
+  int x = 2 + selected_col * CELL_W;
   mvwaddch(win, 1, x, 'v');
 }
 
 void draw_controls(int starty, int board_height) {
   char *msg = "Arrows: Switch columns | Space: Drop Chip | q: Quit";
-  mvprintw(starty + board_height + 3, (COLS - strlen(msg)) / 2, "%s", msg);
+  mvprintw(starty + board_height + CELL_H, (COLS - strlen(msg)) / 2, "%s", msg);
 }
 
-void draw_turn_indicator(int starty, state_t current_player) {
+void draw_turn_indicator(int starty, state_t current_player, bool game_over,
+                         bool draw_game) {
   move(starty - 2, 0);
   clrtoeol();
 
   int x = (COLS - 20) / 2;
-  mvprintw(starty - 2, x, "Turn: ");
+
+  if (!game_over) {
+    mvprintw(starty - 2, x, "Turn: ");
+  } else if (game_over && !draw_game) {
+    mvprintw(starty - 2, x, "Winner: ");
+  } else {
+    mvprintw(starty - 2, x + 8, "Draw!");
+    return;
+  }
 
   if (current_player == RED) {
     attron(COLOR_PAIR(1));
@@ -37,18 +46,18 @@ void draw_board(WINDOW *win, cell_t board[6][7]) {
   // draw
   box(win, 0, 0);
 
-  for (int r = 0; r < 6; ++r) {
-    for (int c = 0; c < 7; ++c) {
+  for (int row = 0; row < 6; ++row) {
+    for (int col = 0; col < 7; ++col) {
 
-      int y = 1 + r * CELL_H;
-      int x = 2 + c * CELL_W;
+      int y = 1 + row * CELL_H;
+      int x = 2 + col * CELL_W;
 
       char symbol = '0';
 
-      if (board[r][c].state == RED) {
+      if (board[row][col].state == RED) {
         wattron(win, COLOR_PAIR(1));
         symbol = 'R';
-      } else if (board[r][c].state == YELLOW) {
+      } else if (board[row][col].state == YELLOW) {
         wattron(win, COLOR_PAIR(2));
         symbol = 'Y';
       }
@@ -76,7 +85,7 @@ state_t choose_player(void) {
     werase(win);
     box(win, 0, 0);
 
-    // Upper indication
+    // upper indication
     mvwprintw(win, 1, 6, "Who will go first?");
 
     // arrows
@@ -101,6 +110,7 @@ state_t choose_player(void) {
     int ch = getch();
 
     switch (ch) {
+
     case KEY_LEFT:
       selected = 0;
       break;
@@ -109,8 +119,11 @@ state_t choose_player(void) {
       selected = 1;
       break;
 
+    // space-key
     case ' ':
       delwin(win);
+
+      // interpolate selected player
       return selected == 0 ? RED : YELLOW;
     }
   }

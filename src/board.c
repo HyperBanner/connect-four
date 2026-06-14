@@ -47,7 +47,12 @@ int count_direction(cell_t board[6][7], int row, int col, int dr, int dc,
 }
 
 bool check_winner(cell_t board[6][7], int row, int col, state_t player) {
-  const int directions[4][2] = {{0, 1}, {1, 0}, {1, 1}, {-1, 1}};
+  const int directions[4][2] = {
+      {0, 1}, // horizontal
+      {1, 0}, // vertical
+      {1, 1}, // diagonal
+      {-1, 1} // other diagonal
+  };
 
   for (int d = 0; d < 4; ++d) {
     int dr = directions[d][0];
@@ -64,4 +69,15 @@ bool check_winner(cell_t board[6][7], int row, int col, state_t player) {
     }
   }
   return false;
+}
+
+bool board_full(cell_t board[6][7]) {
+  for (int row = 0; row < 6; ++row) {
+    for (int col = 0; col < 7; ++col) {
+      if (board[row][col].state == EMPTY) {
+        return false;
+      }
+    }
+  }
+  return true;
 }

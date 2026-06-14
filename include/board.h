@@ -16,3 +16,5 @@ int count_direction(cell_t board[6][7], int row, int col, int dr, int dc,
                     state_t player);
 
 bool check_winner(cell_t board[6][7], int row, int col, state_t player);
+
+bool board_full(cell_t board[6][7]);

@@ -2,18 +2,19 @@
 #include "../include/ui.h"
 #include <inttypes.h>
 #include <ncurses.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 void draw(WINDOW *board_win, WINDOW *selection_win, cell_t board[6][7],
           int starty, int board_height, int selected_col,
-          state_t current_player) {
+          state_t current_player, bool game_over, bool draw_game) {
   werase(selection_win);
   werase(board_win);
 
   draw_selection(selection_win, selected_col);
   draw_board(board_win, board);
-  draw_turn_indicator(starty, current_player);
+  draw_turn_indicator(starty, current_player, game_over, draw_game);
   draw_controls(starty, board_height);
 
   wrefresh(selection_win);
@@ -68,12 +69,13 @@ int main(void) {
   cell_t(*board)[7] = init_board();
   int selected_col = 0;
   bool game_over = false;
+  bool draw_game = false;
   state_t winner = EMPTY;
 
   // Main program loop
   while (1) {
     draw(board_win, selection_win, board, starty, height, selected_col,
-         current_player);
+         current_player, game_over, draw_game);
 
     int ch = getch();
 
@@ -107,6 +109,9 @@ int main(void) {
 
           if (check_winner(board, row, selected_col, current_player)) {
             winner = current_player;
+            game_over = true;
+          } else if (board_full(board)) {
+            draw_game = true;
             game_over = true;
           } else {
             // interpolate player based on previous color
