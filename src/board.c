@@ -1,4 +1,5 @@
 #include "../include/board.h"
+#include "../include/ui.h"
 #include <ncurses.h>
 #include <stdlib.h>
 
@@ -17,14 +18,37 @@ cell_t (*init_board(void))[7] {
   return board;
 }
 
-int drop_chip(cell_t board[6][7], int selected_col, state_t player) {
+int drop_chip(cell_t board[6][7], int selected_col, state_t player,
+              WINDOW *board_win, WINDOW *selection_win, int starty, int height,
+              bool game_over, bool draw_game) {
+  int target_row = -1;
+
   for (int row = 5; row >= 0; --row) {
     if (board[row][selected_col].state == EMPTY) {
-      board[row][selected_col].state = player;
-      return row;
+      target_row = row;
+      break;
     }
   }
-  return -1; // column full
+
+  if (target_row == -1)
+    return -1;
+
+  for (int row = 0; row <= target_row; ++row) {
+    board[row][selected_col].state = player;
+
+    draw(board_win, selection_win, board, starty, height, selected_col, player,
+         game_over, draw_game);
+
+    wrefresh(board_win);
+    wrefresh(selection_win);
+
+    napms(70); // animation speed
+
+    if (row != target_row)
+      board[row][selected_col].state = EMPTY;
+  }
+
+  return target_row;
 }
 
 // helper for check_winner

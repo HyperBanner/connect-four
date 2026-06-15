@@ -69,6 +69,22 @@ void draw_board(WINDOW *win, cell_t board[6][7]) {
   }
 }
 
+void draw(WINDOW *board_win, WINDOW *selection_win, cell_t board[6][7],
+          int starty, int board_height, int selected_col,
+          state_t current_player, bool game_over, bool draw_game) {
+  werase(selection_win);
+  werase(board_win);
+
+  draw_selection(selection_win, selected_col);
+  draw_board(board_win, board);
+  draw_turn_indicator(starty, current_player, game_over, draw_game);
+  draw_controls(starty, board_height);
+
+  wrefresh(selection_win);
+  wrefresh(board_win);
+  refresh();
+}
+
 // pre-game selection menu
 state_t choose_player(void) {
   int selected = 0;

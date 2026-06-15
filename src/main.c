@@ -1,26 +1,9 @@
 #include "../include/board.h"
 #include "../include/ui.h"
-#include <inttypes.h>
 #include <ncurses.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-void draw(WINDOW *board_win, WINDOW *selection_win, cell_t board[6][7],
-          int starty, int board_height, int selected_col,
-          state_t current_player, bool game_over, bool draw_game) {
-  werase(selection_win);
-  werase(board_win);
-
-  draw_selection(selection_win, selected_col);
-  draw_board(board_win, board);
-  draw_turn_indicator(starty, current_player, game_over, draw_game);
-  draw_controls(starty, board_height);
-
-  wrefresh(selection_win);
-  wrefresh(board_win);
-  refresh();
-}
 
 int main(void) {
   initscr();
@@ -70,7 +53,6 @@ int main(void) {
   int selected_col = 0;
   bool game_over = false;
   bool draw_game = false;
-  state_t winner = EMPTY;
 
   // Main program loop
   while (1) {
@@ -103,12 +85,13 @@ int main(void) {
 
       // space_key
       case ' ':
-        int row = drop_chip(board, selected_col, current_player);
+        int row =
+            drop_chip(board, selected_col, current_player, board_win,
+                      selection_win, starty, height, game_over, draw_game);
 
         if (row != -1) {
 
           if (check_winner(board, row, selected_col, current_player)) {
-            winner = current_player;
             game_over = true;
           } else if (board_full(board)) {
             draw_game = true;
