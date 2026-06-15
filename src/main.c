@@ -71,6 +71,20 @@ int main(void) {
       // handle other input
       switch (ch) {
 
+      // handle resize
+      case KEY_RESIZE:
+        getmaxyx(stdscr, screen_rows, screen_cols);
+
+        starty = (screen_rows - height) / 2;
+        startx = (screen_cols - width) / 2;
+
+        mvwin(selection_win, starty, startx);
+        mvwin(board_win, starty + 3, startx);
+
+        clear();
+        refresh();
+        break;
+
       case KEY_LEFT:
         if (selected_col > 0) {
           selected_col--;

@@ -126,6 +126,16 @@ state_t choose_player(void) {
     int ch = getch();
 
     switch (ch) {
+    // handle resize
+    case KEY_RESIZE:
+      y = (LINES - height) / 2;
+      x = (COLS - width) / 2;
+
+      mvwin(win, y, x);
+
+      clear();
+      refresh();
+      break;
 
     case KEY_LEFT:
       selected = 0;
