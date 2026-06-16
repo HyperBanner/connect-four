@@ -6,4 +6,4 @@ It's fantastically dumb and simple, practically held together by duct tape and t
 I did use a somewhat "harder" approach (direction vectors) for detecting a win.
 
 ## Usage
-In the build directory, there's a directly compiled executable. Just give it run access and run it inside your favorite terminal emulator.
+In the build directory, there's a directly compiled executable. Just give it run access and run it inside your favorite terminal emulator (I haven't tested windows nor mac, it might be linux only!).
